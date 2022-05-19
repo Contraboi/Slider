@@ -1,10 +1,8 @@
 const sliderContainers = document.querySelectorAll(".slider-container");
 
-function slide(slider, items, prev, next) {
+function slide(slider, items) {
   let posX1 = 0,
     posX2 = 0,
-    slides = items.getElementsByClassName("slide"),
-    slidesLength = slides.length,
     slideWidth = items.querySelectorAll(".slide")[0].offsetWidth,
     allowShift = true,
     userInteracting = false,
@@ -15,9 +13,32 @@ function slide(slider, items, prev, next) {
     itemCount = items.children.length,
     progressBarItemCount,
     autoPlayValue = items.dataset.autoPlay,
-    dotsValue = items.dataset.dots;
-
+    dotsValue = items.dataset.dots,
+    arrowsValue = items.dataset.arrows;
   items.style.setProperty("--items-per-screen", itemsPerScreen);
+  progressBarItemCount = Math.ceil(itemCount / itemsPerScreen);
+
+  //Add Left and Right arrow if arrowsValue is yes
+  if (arrowsValue) {
+    const nextElement = document.createElement("a");
+    nextElement.classList.add("control");
+    nextElement.classList.add("next");
+
+    const prevElement = document.createElement("a");
+    prevElement.classList.add("control");
+    prevElement.classList.add("prev");
+
+    slider.appendChild(nextElement);
+    slider.appendChild(prevElement);
+
+    // Click events
+    prevElement.addEventListener("click", function () {
+      shiftSlide(-1);
+    });
+    nextElement.addEventListener("click", function () {
+      shiftSlide(1);
+    });
+  }
 
   //Add progress bar if dotsValue is yes
   if (dotsValue) {
@@ -63,14 +84,6 @@ function slide(slider, items, prev, next) {
   // Touch events
   items.addEventListener("touchstart", dragStart);
   items.addEventListener("touchend", dragEnd);
-
-  // Click events
-  prev.addEventListener("click", function () {
-    shiftSlide(-1);
-  });
-  next.addEventListener("click", function () {
-    shiftSlide(1);
-  });
 
   function mouseHover() {
     userInteracting = true;
@@ -157,7 +170,6 @@ function slide(slider, items, prev, next) {
         }
       }
     }
-    console.log(index);
   }
 
   function autoPlay() {
@@ -171,14 +183,10 @@ function slide(slider, items, prev, next) {
   }, autoPlayValue); //run
 }
 
-for (sliderContainer of sliderContainers) {
-  const slider = sliderContainer.querySelector("#slider"),
-    prev = sliderContainer.querySelector("#prev"),
-    next = sliderContainer.querySelector("#next");
-
-  slide(sliderContainer, slider, prev, next);
-}
-
+sliderContainers.forEach((sliderContainer) => {
+  const slider = sliderContainer.querySelector("#slider");
+  slide(sliderContainer, slider);
+});
 function throttle(cb, delay = 1000) {
   let shouldWait = false;
   let waitingArgs;
